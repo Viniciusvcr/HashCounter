@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h> //Função tolower()
 #include <stdlib.h>
 #include <stdio_ext.h>
 
-#define TAM 113 //Tamanho da tabela hash
+#define TAM 26 //Tamanho da tabela hash
 
 typedef char* cstring; //Uso mais fácil de um vetor de char;
 
@@ -104,12 +105,16 @@ int funcao_hash(int chave){ //retorna a posição do hash com base no tamanho da
 	return chave%TAM;
 }
 
+int char_to_int(cstring palavra){ //Retorna o número da tabela ascii da primeira letra, em minúsculo, da palavra
+	return (int)tolower(palavra[0]);
+}
+
 int insere_hash(hash* h, cstring nova_palavra){
-	return insere_ultimo(&(h->tabela[funcao_hash(strlen(nova_palavra))]), nova_palavra);
+	return insere_ultimo(&(h->tabela[funcao_hash(char_to_int(nova_palavra))]), nova_palavra);
 }
 
 int buscar_hash(hash* h, cstring palavra, item* retorno){
-	return buscar_valor_lista(&(h->tabela[funcao_hash(strlen(palavra))]), palavra, retorno);
+	return buscar_valor_lista(&(h->tabela[funcao_hash(char_to_int(palavra))]), palavra, retorno);
 }
 
 void escreve_hash(hash* h){
