@@ -148,6 +148,20 @@ int consultar_palavra(hash* h, cstring palavra){
 		return aux->qntd; //retorna a quantidade de vezes que a palavra apareceu caso encontre
 	return 0; //retorna 0 caso não encontre
 }
+
+lista* mais_frequentes(hash* h, int n){
+	lista *retorno;
+	celula *aux;
+
+	inicializa_lista(retorno);
+	for(int i=0; i<TAM; i++){
+		if(!vazia(&(h->tabela[i]))){
+
+		}
+	}
+
+	return retorno;
+}
 //---------------------------------------//
 
 void cortar_string(cstring s){ //Usado para adicionar \0 ao final de uma string
