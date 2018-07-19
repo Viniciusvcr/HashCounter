@@ -157,9 +157,9 @@ int armazenar_palavras(hash *h, cstring nome_arquivo){
 	if(arq != NULL){
 		while(1){
 			fscanf(arq, "%s", buffer);
-			palavras_novas += insere_hash(h, buffer);
 			if(feof(arq))
 				break;
+			palavras_novas += insere_hash(h, buffer);
 		}
 		return palavras_novas;
 	}
@@ -181,8 +181,10 @@ celula* mais_frequente_hash(hash* h){
 	for(int i=0; i<TAM; i++){
 		if(!vazia(&(h->tabela[i]))){
 			aux = h->tabela[i].primeiro->prox;
-			if(i == 0)
+			if(i == 0){
 				maior = aux->dado.qntd;
+				ret = aux;
+			}
 			while(aux != h->tabela[i].primeiro){
 				if(aux->dado.qntd > maior){
 					ret = aux;
@@ -196,18 +198,20 @@ celula* mais_frequente_hash(hash* h){
 	return ret;
 }
 
-celula* prox_menor(hash* h, int atual){
+celula* prox_menor(hash* h, int atual, lista* l){
 	celula *aux, *ret;
 	int menor;
 
 	for(int i=0; i<TAM; i++){
 		if(!vazia(&(h->tabela[i]))){
 			aux = h->tabela[i].primeiro->prox;
-			if(i == 0)
+			if(i == 0){
 				menor = aux->dado.qntd;
+				ret = aux;
+			}
 			while(aux != h->tabela[i].primeiro){
-				if(aux->dado.qntd < atual){
-					if(aux->dado.qntd > menor){
+				if(aux->dado.qntd <= atual){
+					if(aux->dado.qntd >= menor && !buscar_lista(l, aux->dado.palavra)){
 						ret = aux;
 						menor = aux->dado.qntd;
 					}
@@ -234,7 +238,7 @@ lista* mais_frequentes(hash* h, int n){
 	for(int i=0; i<TAM; i++){
 		if(tam_retorno == n) break;
 		if(!vazia(&(h->tabela[i]))){
-			aux = prox_menor(h, qntd_atual);
+			aux = prox_menor(h, qntd_atual, retorno);
 			insere_ultimo_qntd(retorno, aux->dado.palavra, aux->dado.qntd);
 			qntd_atual = aux->dado.qntd;
 			tam_retorno++;
@@ -252,18 +256,19 @@ void cortar_string(cstring s){ //Usado para adicionar \0 ao final de uma string
 
 int main(){
 	hash A;
-	int opt, qntd_novas_palavras, qntd_ele_mais_frequentes;
+	int opt, qntd_novas_palavras = 0, qntd_ele_mais_frequentes, tamanho_hash = 0;
 	lista *palavras_mais_frequentes;
 	char arquivo[50], consulta[50];
 
 	inicializa_hash(&A);
 	do{
+		tamanho_hash += qntd_novas_palavras;
 		printf("[1] Armazenar palavras\n");
 		printf("[2] Consultar palavra\n");
 		printf("[3] Palavras mais frequentes\n");
 		scanf("%d", &opt);
 
-		switch(opt){
+		switch(opt){			
 			case 1:
 				system("clear");
 				printf("Escreva o nome do arquivo para leitura: ");
