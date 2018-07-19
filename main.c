@@ -66,6 +66,19 @@ int insere_ultimo(lista *l, cstring nova_palavra){
 	}
 }
 
+void insere_ultimo_qntd(lista *l, cstring nova_palavra, int qntd){
+	celula *novo;
+
+	novo = (celula *)malloc(sizeof(celula));
+	novo->dado.palavra = (char*)malloc(sizeof(char)*strlen(nova_palavra));
+	strcpy(novo->dado.palavra, nova_palavra);
+	novo->dado.qntd = qntd;
+	novo->prox=l->primeiro;
+	novo->ant=l->primeiro->ant;
+	l->primeiro->ant->prox=novo;
+	l->primeiro->ant=novo;
+}
+
 int buscar_valor_lista(lista *l, cstring palavra, struct tipo_item *x){
 	celula *c = buscar_lista(l,palavra);
 
@@ -86,11 +99,22 @@ void escreve_lista(struct tipo_lista *l){
 	printf("\n");
 }
 
+void escreve_mais_frequentes(lista* l){
+	celula *aux = l->primeiro->prox;
+
+	while(aux != l->primeiro){
+		printf("Palavra: %s\nQntd: %d\n", aux->dado.palavra, aux->dado.qntd);
+		aux = aux->prox;
+		printf("\n");
+	}
+	printf("\n");
+}
+
 //-----------------------------------------//
 
 //------------------HASH------------------//
 
-//Parâmetro para funcao_hash: tamanho da palavra
+//Parâmetro para funcao_hash: Código ascii da primeira letra em minúsculo da palavra
 
 typedef struct tipo_hash{
 	lista tabela[TAM];
@@ -101,7 +125,7 @@ void inicializa_hash(hash *h){
 		inicializa_lista(&(h->tabela[i]));
 }
 
-int funcao_hash(int chave){ //retorna a posição do hash com base no tamanho da tabela
+int funcao_hash(int chave){ //retorna a posição do hash com base em "Parâmetro para função_hash"
 	return chave%TAM;
 }
 
@@ -149,15 +173,73 @@ int consultar_palavra(hash* h, cstring palavra){
 	return 0; //retorna 0 caso não encontre
 }
 
+celula* mais_frequente_hash(hash* h){
+	celula *aux;
+	celula *ret;
+	int maior;
+
+	for(int i=0; i<TAM; i++){
+		if(!vazia(&(h->tabela[i]))){
+			aux = h->tabela[i].primeiro->prox;
+			if(i == 0)
+				maior = aux->dado.qntd;
+			while(aux != h->tabela[i].primeiro){
+				if(aux->dado.qntd > maior){
+					ret = aux;
+					maior = aux->dado.qntd;
+				}
+				aux = aux->prox;	
+			}
+		}
+	}
+
+	return ret;
+}
+
+celula* prox_menor(hash* h, int atual){
+	celula *aux, *ret;
+	int menor;
+
+	for(int i=0; i<TAM; i++){
+		if(!vazia(&(h->tabela[i]))){
+			aux = h->tabela[i].primeiro->prox;
+			if(i == 0)
+				menor = aux->dado.qntd;
+			while(aux != h->tabela[i].primeiro){
+				if(aux->dado.qntd < atual){
+					if(aux->dado.qntd > menor){
+						ret = aux;
+						menor = aux->dado.qntd;
+					}
+				}
+				aux = aux->prox;
+			}
+		}
+	}
+
+	return ret;
+}
+
 lista* mais_frequentes(hash* h, int n){
 	lista *retorno;
 	celula *aux;
+	int tam_retorno = 0, qntd_atual;
 
 	inicializa_lista(retorno);
-	for(int i=0; i<TAM; i++){
-		if(!vazia(&(h->tabela[i]))){
+	aux = mais_frequente_hash(h);
+	qntd_atual = aux->dado.qntd;
+	insere_ultimo_qntd(retorno, aux->dado.palavra, aux->dado.qntd);
+	tam_retorno++;
 
+	for(int i=0; i<TAM; i++){
+		if(tam_retorno == n) break;
+		if(!vazia(&(h->tabela[i]))){
+			aux = prox_menor(h, qntd_atual);
+			insere_ultimo_qntd(retorno, aux->dado.palavra, aux->dado.qntd);
+			qntd_atual = aux->dado.qntd;
+			tam_retorno++;
 		}
+		if(i == TAM-1 && tam_retorno < n) i = 0;
 	}
 
 	return retorno;
@@ -170,7 +252,8 @@ void cortar_string(cstring s){ //Usado para adicionar \0 ao final de uma string
 
 int main(){
 	hash A;
-	int opt, qntd_novas_palavras;
+	int opt, qntd_novas_palavras, qntd_ele_mais_frequentes;
+	lista *palavras_mais_frequentes;
 	char arquivo[50], consulta[50];
 
 	inicializa_hash(&A);
@@ -203,9 +286,16 @@ int main(){
 				printf("\n");
 			break;
 
+			case 3:
+				printf("Insira a quantidade de elementos: ");
+				scanf("%d", &qntd_ele_mais_frequentes);
+				palavras_mais_frequentes = mais_frequentes(&A, qntd_ele_mais_frequentes);
+				escreve_mais_frequentes(palavras_mais_frequentes);
+			break;
+
 			case 4:
 				escreve_hash(&A);
-				break;
+			break;
 		}
 		__fpurge(stdin);
 	}while(opt != 0);
