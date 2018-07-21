@@ -118,9 +118,11 @@ void escreve_mais_frequentes(lista* l){
 
 typedef struct tipo_hash{
 	lista tabela[TAM];
+	int qntd; //quantidade de palavras no hash, sem contar repetições
 }hash;
 
 void inicializa_hash(hash *h){
+	h->qntd = 0;
 	for(int i=0; i<TAM; i++)
 		inicializa_lista(&(h->tabela[i]));
 }
@@ -231,6 +233,11 @@ lista* mais_frequentes(hash* h, int n){
 	celula *aux;
 	int tam_retorno = 0, qntd_atual;
 
+	if(n > h->qntd){
+		printf("\033[1;31mNão há %d palavras distintas. Mostrando %d como alternativa.\n\n\033[0m", n, h->qntd);
+		n = h->qntd;
+	}
+
 	inicializa_lista(retorno);
 	aux = mais_frequente_hash(h);
 	qntd_atual = aux->dado.qntd;
@@ -277,9 +284,10 @@ int main(){
 				fgets(arquivo, 50, stdin);
 				cortar_string(arquivo);
 				qntd_novas_palavras = armazenar_palavras(&A, arquivo);
-				tamanho_hash += qntd_novas_palavras;
-				if(qntd_novas_palavras != -1)
+				if(qntd_novas_palavras != -1){
 					printf("\nLeitura concluída.\nForam adicionadas %d novas palavras!\n", qntd_novas_palavras);
+					A.qntd += qntd_novas_palavras;
+				}
 				else printf("ARQUIVO INEXISTENTE!\n");
 				printf("\n");
 				break;
@@ -303,6 +311,9 @@ int main(){
 			case 4:
 				escreve_hash(&A);
 			break;
+
+			case 5:
+				printf("%d\n", A.qntd);
 		}
 		__fpurge(stdin);
 	}while(opt != 0);
