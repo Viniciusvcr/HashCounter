@@ -176,14 +176,15 @@ int consultar_palavra(hash* h, cstring palavra){
 celula* mais_frequente_hash(hash* h){
 	celula *aux;
 	celula *ret;
-	int maior;
+	int maior, flag = 0;
 
 	for(int i=0; i<TAM; i++){
 		if(!vazia(&(h->tabela[i]))){
 			aux = h->tabela[i].primeiro->prox;
-			if(i == 0){
+			if(!flag){
 				maior = aux->dado.qntd;
 				ret = aux;
+				flag = 1;
 			}
 			while(aux != h->tabela[i].primeiro){
 				if(aux->dado.qntd > maior){
@@ -200,14 +201,15 @@ celula* mais_frequente_hash(hash* h){
 
 celula* prox_menor(hash* h, int atual, lista* l){
 	celula *aux, *ret;
-	int menor;
+	int menor, flag = 0;
 
 	for(int i=0; i<TAM; i++){
 		if(!vazia(&(h->tabela[i]))){
 			aux = h->tabela[i].primeiro->prox;
-			if(i == 0){
+			if(!flag){
 				menor = aux->dado.qntd;
 				ret = aux;
+				flag = 1;
 			}
 			while(aux != h->tabela[i].primeiro){
 				if(aux->dado.qntd <= atual){
@@ -262,7 +264,6 @@ int main(){
 
 	inicializa_hash(&A);
 	do{
-		tamanho_hash += qntd_novas_palavras;
 		printf("[1] Armazenar palavras\n");
 		printf("[2] Consultar palavra\n");
 		printf("[3] Palavras mais frequentes\n");
@@ -276,6 +277,7 @@ int main(){
 				fgets(arquivo, 50, stdin);
 				cortar_string(arquivo);
 				qntd_novas_palavras = armazenar_palavras(&A, arquivo);
+				tamanho_hash += qntd_novas_palavras;
 				if(qntd_novas_palavras != -1)
 					printf("\nLeitura concluída.\nForam adicionadas %d novas palavras!\n", qntd_novas_palavras);
 				else printf("ARQUIVO INEXISTENTE!\n");
