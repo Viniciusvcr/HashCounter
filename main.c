@@ -157,10 +157,8 @@ int armazenar_palavras(hash *h, cstring nome_arquivo){
 	int palavras_novas = 0; //Esta variável aumenta conforme novas palavras são adicionadas ao hash e é retornada por esta função
 
 	if(arq != NULL){
-		while(1){
+		while(!feof(arq)){
 			fscanf(arq, "%s", buffer);
-			if(feof(arq))
-				break;
 			palavras_novas += insere_hash(h, buffer);
 		}
 		return palavras_novas;
@@ -271,6 +269,7 @@ int main(){
 
 	inicializa_hash(&A);
 	do{
+		printf("[0] Sair\n");
 		printf("[1] Armazenar palavras\n");
 		printf("[2] Consultar palavra\n");
 		printf("[3] Palavras mais frequentes\n");
@@ -306,10 +305,6 @@ int main(){
 				scanf("%d", &qntd_ele_mais_frequentes);
 				palavras_mais_frequentes = mais_frequentes(&A, qntd_ele_mais_frequentes);
 				escreve_mais_frequentes(palavras_mais_frequentes);
-			break;
-
-			case 4:
-				escreve_hash(&A);
 			break;
 
 			case 5:
